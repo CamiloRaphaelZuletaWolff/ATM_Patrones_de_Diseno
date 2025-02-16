@@ -188,10 +188,10 @@ fun contenidoPantallaInicial(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally){
         Column(modifier.padding(top = 50.dp, bottom = 40.dp)){
-            TextField(value = text, onValueChange = { onTextChanged }, label = { Text("CONTRASEÑA") })
+            TextField(value = text, onValueChange = { onTextChanged(it) }, label = { Text("CONTRASEÑA") })
         }
         BotonesNumeros()
-        Button(onClick = { onClick },content = { Text("Cargar") })
+        Button(onClick = onClick ,content = { Text("Cargar") })
     }
 
 }
