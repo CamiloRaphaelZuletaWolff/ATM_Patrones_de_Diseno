@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,41 +37,62 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ATMPatronesDeDiseñoTheme {
-                // Estado para controlar qué pantalla mostrar
-                var mostrarSeleccion by remember { mutableStateOf(false) }
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    if (mostrarSeleccion) {
-                        // Mostrar la nueva pantalla de selección
-                        PantallaSeleccion(
-                            saldo = 0,
-                            onDepositarClick = { /* Lógica para depositar */ },
-                            onRetirarClick = { /* Lógica para retirar */ },
-                            onVolverClick = { mostrarSeleccion = false } // Volver a la pantalla anterior
-                        )
-                    } else {
-                        // Mostrar la pantalla anterior
-                        Pantallas(modifier = Modifier.padding(innerPadding)) { innerModifier ->
-                            Column(
-                                modifier = innerModifier,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                contenidoPantallaInicial()
-                                Button(
-                                    onClick = { mostrarSeleccion = true }, // Ir a la pantalla de selección
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    Text(text = "Ir a selección", fontSize = 20.sp)
-                                }
-                            }
-                        }
-                    }
-                }
+                ATMScrenn()
             }
         }
     }
 }
+
+
+@Composable
+fun ATMScrenn(modifier: Modifier = Modifier) {
+    var  saldo by rememberSaveable { mutableStateOf(0) }
+    var pantallaActual by remember { mutableStateOf(1) }
+    
+    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+        when(pantallaActual){
+            2 -> {   // Pantalla Seleccion
+                PantallaSeleccion(
+                saldo = saldo,
+                onDepositarClick = { pantallaActual = 4 },
+                onRetirarClick = { pantallaActual = 3},
+                onVolverClick = { pantallaActual = 1 } // Volver a la pantalla anterior
+            )
+            }
+            1 -> {    // Pantalla inicial
+            // Mostrar la pantalla anterior
+            Pantallas(modifier = Modifier.padding(innerPadding)) {
+                contenidoPantallaInicial()
+            }
+
+
+//                Column(
+//                    modifier = modifier,
+//                    horizontalAlignment = Alignment.CenterHorizontally
+//                ) {
+//                    contenidoPantallaInicial()
+//                    Button(
+//                        onClick = { pantallaActual = 2 }, // Ir a la pantalla de selección
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .padding(16.dp)
+//                    ) {
+//                        Text(text = "Ir a selección", fontSize = 20.sp)
+//                    }
+//                }
+            }
+            3 -> {
+
+            }
+
+            4 ->{
+
+            }
+        }
+    }
+
+}
+
 
 @Composable
 fun Pantallas(modifier: Modifier = Modifier, contenido : @Composable  (m: Modifier) -> Unit) {
@@ -156,11 +178,11 @@ fun PantallaSeleccion(saldo : Int,
 fun contenidoPantallaInicial(modifier: Modifier = Modifier) {
     Column(horizontalAlignment = Alignment.CenterHorizontally){
         Column(modifier.padding(top = 50.dp, bottom = 40.dp)){
-        TextField(value ="", onValueChange = {}, label = { Text("USUARIO") })
-        TextField(value ="", onValueChange = {}, label = { Text("CONTRASEÑA") })
+            TextField(value ="", onValueChange = {}, label = { Text("CONTRASEÑA") })
+            Button(modifier = Modifier, onClick = { /*TODO*/ },content = { Text("Cargar") })
         }
         BotonesNumeros()
-        Button(onClick = { /*TODO*/ },content = { Text("Cargar") })             }
+    }
 
 }
 
