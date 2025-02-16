@@ -21,7 +21,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -47,7 +46,8 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ATMScrenn(modifier: Modifier = Modifier) {
     var  saldo by rememberSaveable { mutableStateOf(0) }
-    var pantallaActual by remember { mutableStateOf(1) }
+    var pantallaActual by rememberSaveable { mutableStateOf(1) }
+    var texto by rememberSaveable { mutableStateOf("") }
     
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         when(pantallaActual){
@@ -62,7 +62,12 @@ fun ATMScrenn(modifier: Modifier = Modifier) {
             1 -> {    // Pantalla inicial
             // Mostrar la pantalla anterior
             Pantallas(modifier = Modifier.padding(innerPadding)) {
-                contenidoPantallaInicial()
+                contenidoPantallaInicial(
+                    modifier = Modifier,
+                    text = texto,
+                    onTextChanged = {it: String -> texto = it},
+                    onClick = { if(texto == "1234") pantallaActual = 2 else println("Contraseña incorrecta") }
+                )
             }
 
 
@@ -175,16 +180,23 @@ fun PantallaSeleccion(saldo : Int,
 
 
 @Composable
-fun contenidoPantallaInicial(modifier: Modifier = Modifier) {
+fun contenidoPantallaInicial(
+    modifier: Modifier = Modifier,
+    onTextChanged: (String) -> Unit,
+    text: String,
+    onClick: () -> Unit
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally){
         Column(modifier.padding(top = 50.dp, bottom = 40.dp)){
-            TextField(value ="", onValueChange = {}, label = { Text("CONTRASEÑA") })
-            Button(modifier = Modifier, onClick = { /*TODO*/ },content = { Text("Cargar") })
+            TextField(value = text, onValueChange = { onTextChanged }, label = { Text("CONTRASEÑA") })
         }
         BotonesNumeros()
+        Button(onClick = { onClick },content = { Text("Cargar") })
     }
 
 }
+
+
 
 @Composable
 fun BotonesNumeros(modifier: Modifier = Modifier) {
@@ -296,11 +308,15 @@ fun PantallaSeleccionPreview() {
 
 @Composable
 fun PantallaInicial(name: String, modifier: Modifier = Modifier) {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(androidx.compose.ui.graphics.Color.DarkGray)) {
-        Pantallas(contenido = {contenidoPantallaInicial()})
-    }
+//    Column(modifier = Modifier
+//        .fillMaxSize()
+//        .background(androidx.compose.ui.graphics.Color.DarkGray)) {
+//        Pantallas(contenido = {contenidoPantallaInicial(
+//            onTextChanged = { it: String -> texto = it},
+//            text = texto,
+//            onClick = { if(texto == "1234") pantallaActual = 2 else println("Contraseña incorrecta") }
+//        ) })
+//    }
 }
 
 @Preview(showBackground = true)
