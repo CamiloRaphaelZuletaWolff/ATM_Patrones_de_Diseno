@@ -1,6 +1,7 @@
 package com.example.atmpatronesdediseo
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,17 +15,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,7 +41,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ATMPatronesDeDiseñoTheme {
-                ATMScrenn()
+                ATMScreen()
             }
         }
     }
@@ -44,11 +49,13 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun ATMScrenn(modifier: Modifier = Modifier) {
-    var  saldo by rememberSaveable { mutableStateOf(0) }
-    var pantallaActual by rememberSaveable { mutableStateOf(1) }
+fun ATMScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var  saldo by rememberSaveable { mutableIntStateOf(465465) }
+    var pantallaActual by rememberSaveable { mutableIntStateOf(1) }
     var texto by rememberSaveable { mutableStateOf("") }
-    
+    var monto by rememberSaveable { mutableStateOf("") }
+
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         when(pantallaActual){
             2 -> {   // Pantalla Seleccion
@@ -65,32 +72,50 @@ fun ATMScrenn(modifier: Modifier = Modifier) {
                 contenidoPantallaInicial(
                     modifier = Modifier,
                     text = texto,
-                    onTextChanged = {it: String -> texto = it},
-                    onClick = { if(texto == "1234") pantallaActual = 2 else println("Contraseña incorrecta") }
+                    onTextChanged = {texto = it},
+                    onClick = { if(texto == "1234") pantallaActual = 2 else  Toast.makeText(context, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
+                    }
                 )
             }
-
-
-//                Column(
-//                    modifier = modifier,
-//                    horizontalAlignment = Alignment.CenterHorizontally
-//                ) {
-//                    contenidoPantallaInicial()
-//                    Button(
-//                        onClick = { pantallaActual = 2 }, // Ir a la pantalla de selección
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .padding(16.dp)
-//                    ) {
-//                        Text(text = "Ir a selección", fontSize = 20.sp)
-//                    }
-//                }
             }
             3 -> {
+                monto = ""
+                Pantallas(modifier = Modifier.padding(innerPadding)) {
+                    contenidoPantallaRetiro(
+                        saldo = saldo,
+                        textoTextField = monto,
+                        onTextChanged = { newText : String ->
+                            if (newText.all { it.isDigit() }) { // Permitir solo dígitos
+                                monto = newText
+                            }else{
+                                Toast.makeText(context, "Solo puedes introducir numeros", Toast.LENGTH_SHORT).show()
 
+                            }
+                        },
+                        onClick = {if(monto.toInt() <= saldo) saldo -= monto.toInt() else Toast.makeText(context, "No hay suficiente saldo", Toast.LENGTH_SHORT).show()},
+                        volver = {pantallaActual = 2}
+                    )
+                }
             }
-
             4 ->{
+                monto = ""
+                Pantallas(modifier = Modifier.padding(innerPadding)) {
+                    contenidoPantallaDepositar(
+                        saldo = saldo,
+                        onTextChanged = { newText : String ->
+                            if (newText.all { it.isDigit() }) { // Permitir solo dígitos
+                                monto = newText
+                            }else{
+                                Toast.makeText(context, "Solo puedes introducir numeros", Toast.LENGTH_SHORT).show()
+
+                            }
+                        },
+                        onClick = {saldo += monto.toInt()},
+                        textoTextField = monto,
+                        volver = {pantallaActual = 2}
+
+                    )
+                }
 
             }
         }
@@ -188,10 +213,10 @@ fun contenidoPantallaInicial(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally){
         Column(modifier.padding(top = 50.dp, bottom = 40.dp)){
-            TextField(value = text, onValueChange = { onTextChanged }, label = { Text("CONTRASEÑA") })
+            TextField(value = text, onValueChange = { onTextChanged(it) }, label = { Text("CONTRASEÑA") })
         }
         BotonesNumeros()
-        Button(onClick = { onClick },content = { Text("Cargar") })
+        Button(onClick = onClick ,content = { Text("Cargar") })
     }
 
 }
@@ -225,7 +250,13 @@ fun BotonItem(numero: Int) {
 
 
 @Composable
-fun contenidoPantallaRetiro(){
+fun contenidoPantallaRetiro(
+    saldo: Int,
+    onTextChanged: (String) -> Unit,
+    onClick: () -> Unit,
+    textoTextField: String,
+    volver: () -> Unit
+) {
     Column(
         modifier = Modifier
             .padding(16.dp),
@@ -234,16 +265,14 @@ fun contenidoPantallaRetiro(){
     ) {
 
         Text(
-            text = "Saldo actual: 0",
+            text = "Saldo actual: $saldo",
             fontSize = 24.sp,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
-        TextField("", {}, label = { Text("Monto a retirar")})
-        // Botón para depositar
+        TextField(value = textoTextField, {onTextChanged(it)}, label = { Text("Monto a retirar")},keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
         Button(
-            onClick =
-            {},
+            onClick = onClick ,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
@@ -258,7 +287,13 @@ fun contenidoPantallaRetiro(){
 
 
 @Composable
-fun contenidoPantallaDepositar(){
+fun contenidoPantallaDepositar(
+    saldo: Int,
+    onTextChanged: (String) -> Unit,
+    onClick: () -> Unit,
+    textoTextField: String,
+    volver: () -> Unit
+) {
     Column(
         modifier = Modifier
             .padding(16.dp),
@@ -267,21 +302,20 @@ fun contenidoPantallaDepositar(){
     ) {
 
         Text(
-            text = "Saldo actual: 0",
+            text = "Saldo actual: $saldo",
             fontSize = 24.sp,
             modifier = Modifier.padding(vertical = 16.dp)
         )
 
-        TextField("", {}, label = { Text("Monto a retirar")})
+        TextField(textoTextField, {onTextChanged(it)}, label = { Text("Monto a Depositar")})
         // Botón para depositar
         Button(
-            onClick =
-            {},
+            onClick = onClick,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 8.dp)
         ) {
-            Text(text = "Retirar", fontSize = 20.sp)
+            Text(text = "Depositar", fontSize = 20.sp)
         }
 
 
