@@ -92,7 +92,10 @@ fun ATMScreen(modifier: Modifier = Modifier) {
 
                             }
                         },
-                        onClick = {if(monto.toInt() <= saldo) saldo -= monto.toInt() else Toast.makeText(context, "No hay suficiente saldo", Toast.LENGTH_SHORT).show()},
+                        onClick = {
+                            Toast.makeText(context, "Retiro realizado", Toast.LENGTH_SHORT).show()
+                            if(monto.toInt() <= saldo) saldo -= monto.toInt()
+                            else Toast.makeText(context, "No hay suficiente saldo", Toast.LENGTH_SHORT).show()},
                         volver = {pantallaActual = 2}
                     )
                 }
@@ -110,7 +113,10 @@ fun ATMScreen(modifier: Modifier = Modifier) {
 
                             }
                         },
-                        onClick = {saldo += monto.toInt()},
+                        onClick = {
+                            saldo += monto.toInt()
+                            Toast.makeText(context, "Deposito realizado", Toast.LENGTH_SHORT).show()
+                                  },
                         textoTextField = monto,
                         volver = {pantallaActual = 2}
 
