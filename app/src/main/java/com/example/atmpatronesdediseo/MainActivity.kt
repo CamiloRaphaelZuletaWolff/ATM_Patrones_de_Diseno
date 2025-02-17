@@ -1,6 +1,5 @@
 package com.example.atmpatronesdediseo
 
-import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -10,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,7 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -56,14 +57,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ATMScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-    var  saldo by rememberSaveable { mutableIntStateOf(465465) }
-    var pantallaActual by rememberSaveable { mutableIntStateOf(1) }
+    var  saldo by rememberSaveable { mutableLongStateOf(465465) }
+    var pantallaActual by rememberSaveable { mutableLongStateOf(1) }
     var texto by rememberSaveable { mutableStateOf("") }
     var monto by rememberSaveable { mutableStateOf("0") }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         when(pantallaActual){
-            2 -> {   // Pantalla Seleccion
+            2L -> {   // Pantalla Seleccion
                 PantallaSeleccion(
                 saldo = saldo,
                 onDepositarClick = { pantallaActual = 4 },
@@ -71,19 +72,20 @@ fun ATMScreen(modifier: Modifier = Modifier) {
                 onVolverClick = { pantallaActual = 1 } // Volver a la pantalla anterior
             )
             }
-            1 -> {    // Pantalla inicial
+            1L -> {    // Pantalla inicial
             // Mostrar la pantalla anterior
             Pantallas(modifier = Modifier.padding(innerPadding)) {
                 contenidoPantallaInicial(
                     modifier = Modifier,
                     text = texto,
-                    onTextChanged = {texto = it},
+                    onButtonPressed = { texto += it },
+                    eliminar = {texto = ""},
                     onClick = { if(texto == "1234") pantallaActual = 2 else  Toast.makeText(context, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
             }
-            3 -> {    // Pantalla Retirar Dinero
+            3L -> {    // Pantalla Retirar Dinero
                 monto = "0"
                 Pantallas(modifier = Modifier.padding(innerPadding)) {
                     contenidoPantallaRetiro(
@@ -97,12 +99,12 @@ fun ATMScreen(modifier: Modifier = Modifier) {
 
                             }
                         },
-                        onClick = {if(monto.toInt() <= saldo) saldo -= monto.toInt() else Toast.makeText(context, "No hay suficiente saldo", Toast.LENGTH_SHORT).show()},
+                        onClick = {if(monto.toLong() <= saldo) saldo -= monto.toLong() else Toast.makeText(context, "No hay suficiente saldo", Toast.LENGTH_SHORT).show()},
                         volver = {pantallaActual = 2}
                     )
                 }
             }
-            4 ->{   // Pantalla Depositar Dinero
+            4L ->{   // Pantalla Depositar Dinero
                 monto = "0"
                 Pantallas(modifier = Modifier.padding(innerPadding)) {
                     contenidoPantallaDepositar(
@@ -115,7 +117,7 @@ fun ATMScreen(modifier: Modifier = Modifier) {
 
                             }
                         },
-                        onClick = {saldo += monto.toInt()},
+                        onClick = {saldo += monto.toLong()},
                         textoTextField = monto,
                         volver = {pantallaActual = 2}
 
@@ -152,11 +154,12 @@ fun Pantallas(modifier: Modifier = Modifier, contenido : @Composable  (m: Modifi
 
 
 @Composable
-fun PantallaSeleccion(saldo : Int,
-                      onDepositarClick: () -> Unit,
-                      onRetirarClick: () -> Unit,
-                      onVolverClick: () -> Unit, // Callback para volver a la pantalla anterior
-                      modifier: Modifier = Modifier
+fun PantallaSeleccion(
+    saldo: Long,
+    onDepositarClick: () -> Unit,
+    onRetirarClick: () -> Unit,
+    onVolverClick: () -> Unit, // Callback para volver a la pantalla anterior
+    modifier: Modifier = Modifier
 ){
     Pantallas(modifier = modifier) {
         Column(
@@ -212,15 +215,21 @@ fun PantallaSeleccion(saldo : Int,
 @Composable
 fun contenidoPantallaInicial(
     modifier: Modifier = Modifier,
-    onTextChanged: (String) -> Unit,
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onButtonPressed: (String) -> Unit,
+    eliminar: () -> Unit
 ) {
+
     Column(horizontalAlignment = Alignment.CenterHorizontally){
-        Column(modifier.padding(top = 50.dp, bottom = 40.dp)){
-            TextField(value = text, onValueChange = { onTextChanged(it) }, label = { Text("CONTRASEÑA") })
+        Row(modifier.padding(top = 50.dp, bottom = 40.dp, end = 10.dp,start = 10.dp)){
+            Text(text = text, modifier= Modifier.weight(5F))
+            IconButton(onClick = eliminar,modifier = modifier.weight(1F)) {
+                Icon(imageVector = Icons.Default.Clear, contentDescription = "Borrar")
+            }
+
         }
-        BotonesNumeros()
+        BotonesNumeros(onItemPressed = onButtonPressed)
         Button(onClick = onClick ,content = { Text("Cargar") })
     }
 
@@ -229,10 +238,10 @@ fun contenidoPantallaInicial(
 
 
 @Composable
-fun BotonesNumeros(modifier: Modifier = Modifier) {
+fun BotonesNumeros(modifier: Modifier = Modifier, onItemPressed: (String) -> Unit) {
     LazyVerticalGrid(modifier = Modifier.background(androidx.compose.ui.graphics.Color.Gray), columns = GridCells.Fixed(3)) {
         items(9) {numero ->
-            BotonItem(numero = numero+1)
+            BotonItem(numero = numero+1) { onItemPressed((numero+1).toString()) }
 
         }
     }
@@ -240,9 +249,9 @@ fun BotonesNumeros(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun BotonItem(numero: Int) {
+fun BotonItem(numero: Int, function: () -> Unit) {
     Button(
-        onClick = { /*TODO*/ },
+        onClick = function,
         modifier = Modifier
             .padding(10.dp)
             .size(100.dp)
@@ -256,7 +265,7 @@ fun BotonItem(numero: Int) {
 
 @Composable
 fun contenidoPantallaRetiro(
-    saldo: Int,
+    saldo: Long,
     onTextChanged: (String) -> Unit,
     onClick: () -> Unit,
     textoTextField: String,
@@ -298,7 +307,7 @@ fun contenidoPantallaRetiro(
 
 @Composable
 fun contenidoPantallaDepositar(
-    saldo: Int,
+    saldo: Long,
     onTextChanged: (String) -> Unit,
     onClick: () -> Unit,
     textoTextField: String,
