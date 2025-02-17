@@ -1,5 +1,6 @@
 package com.example.atmpatronesdediseo
 
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -16,7 +17,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -54,7 +59,7 @@ fun ATMScreen(modifier: Modifier = Modifier) {
     var  saldo by rememberSaveable { mutableIntStateOf(465465) }
     var pantallaActual by rememberSaveable { mutableIntStateOf(1) }
     var texto by rememberSaveable { mutableStateOf("") }
-    var monto by rememberSaveable { mutableStateOf("") }
+    var monto by rememberSaveable { mutableStateOf("0") }
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         when(pantallaActual){
@@ -78,8 +83,8 @@ fun ATMScreen(modifier: Modifier = Modifier) {
                 )
             }
             }
-            3 -> {
-                monto = ""
+            3 -> {    // Pantalla Retirar Dinero
+                monto = "0"
                 Pantallas(modifier = Modifier.padding(innerPadding)) {
                     contenidoPantallaRetiro(
                         saldo = saldo,
@@ -97,8 +102,8 @@ fun ATMScreen(modifier: Modifier = Modifier) {
                     )
                 }
             }
-            4 ->{
-                monto = ""
+            4 ->{   // Pantalla Depositar Dinero
+                monto = "0"
                 Pantallas(modifier = Modifier.padding(innerPadding)) {
                     contenidoPantallaDepositar(
                         saldo = saldo,
@@ -279,6 +284,10 @@ fun contenidoPantallaRetiro(
         ) {
             Text(text = "Retirar", fontSize = 20.sp)
         }
+        IconButton(onClick = volver) {
+            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Atrás")
+        }
+
 
 
     }
@@ -317,6 +326,9 @@ fun contenidoPantallaDepositar(
                 .padding(vertical = 8.dp)
         ) {
             Text(text = "Depositar", fontSize = 20.sp)
+        }
+        IconButton(onClick = volver) {
+            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Atrás")
         }
 
 
