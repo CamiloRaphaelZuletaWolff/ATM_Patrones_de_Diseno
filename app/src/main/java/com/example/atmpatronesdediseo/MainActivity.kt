@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -80,7 +81,10 @@ fun ATMScreen(modifier: Modifier = Modifier) {
                     text = texto,
                     onButtonPressed = { texto += it },
                     eliminar = {texto = ""},
-                    onClick = { if(texto == "1234") pantallaActual = 2 else  Toast.makeText(context, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
+                    onClick = {
+                        if(texto == "1234") pantallaActual = 2 else  Toast.makeText(context, "Contraseña incorrecta", Toast.LENGTH_SHORT).show()
+
+
                     }
                 )
             }
@@ -88,7 +92,7 @@ fun ATMScreen(modifier: Modifier = Modifier) {
             3L -> {    // Pantalla Retirar Dinero
                 monto = "0"
                 Pantallas(modifier = Modifier.padding(innerPadding)) {
-                    contenidoPantallaRetiro(
+                    ContenidoPantallaRetiro(
                         saldo = saldo,
                         textoTextField = monto,
                         onTextChanged = { newText : String ->
@@ -99,7 +103,11 @@ fun ATMScreen(modifier: Modifier = Modifier) {
 
                             }
                         },
-                        onClick = {if(monto.toLong() <= saldo) saldo -= monto.toLong() else Toast.makeText(context, "No hay suficiente saldo", Toast.LENGTH_SHORT).show()},
+                        onClick = {if(monto.toLong() <= saldo){
+                            saldo -= monto.toLong()
+                            Toast.makeText(context, "Retiro exitoso", Toast.LENGTH_SHORT).show()
+                        }
+                        else Toast.makeText(context, "No hay suficiente saldo", Toast.LENGTH_SHORT).show()},
                         volver = {pantallaActual = 2}
                     )
                 }
@@ -117,7 +125,10 @@ fun ATMScreen(modifier: Modifier = Modifier) {
 
                             }
                         },
-                        onClick = {saldo += monto.toLong()},
+                        onClick = {
+                            saldo += monto.toLong()
+                            Toast.makeText(context, "Deposito exitoso", Toast.LENGTH_SHORT).show()
+                                  },
                         textoTextField = monto,
                         volver = {pantallaActual = 2}
 
@@ -172,7 +183,7 @@ fun PantallaSeleccion(
             Text(
                 text = "Saldo actual: $saldo",
                 fontSize = 24.sp,
-                modifier = Modifier.padding(vertical = 16.dp)
+                modifier = Modifier.padding(vertical = 16.dp).background(MaterialTheme.colorScheme.background)
             )
 
             // Botón para depositar
@@ -223,7 +234,7 @@ fun contenidoPantallaInicial(
 
     Column(horizontalAlignment = Alignment.CenterHorizontally){
         Row(modifier.padding(top = 50.dp, bottom = 40.dp, end = 10.dp,start = 10.dp)){
-            Text(text = text, modifier= Modifier.weight(5F))
+            Text(text = text, modifier= Modifier.weight(5F).background(MaterialTheme.colorScheme.background))
             IconButton(onClick = eliminar,modifier = modifier.weight(1F)) {
                 Icon(imageVector = Icons.Default.Clear, contentDescription = "Borrar")
             }
@@ -264,7 +275,7 @@ fun BotonItem(numero: Int, function: () -> Unit) {
 
 
 @Composable
-fun contenidoPantallaRetiro(
+fun ContenidoPantallaRetiro(
     saldo: Long,
     onTextChanged: (String) -> Unit,
     onClick: () -> Unit,
@@ -281,7 +292,7 @@ fun contenidoPantallaRetiro(
         Text(
             text = "Saldo actual: $saldo",
             fontSize = 24.sp,
-            modifier = Modifier.padding(vertical = 16.dp)
+            modifier = Modifier.padding(vertical = 16.dp).background(MaterialTheme.colorScheme.background)
         )
 
         TextField(value = textoTextField, {onTextChanged(it)}, label = { Text("Monto a retirar")},keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number))
@@ -323,7 +334,7 @@ fun contenidoPantallaDepositar(
         Text(
             text = "Saldo actual: $saldo",
             fontSize = 24.sp,
-            modifier = Modifier.padding(vertical = 16.dp)
+            modifier = Modifier.padding(vertical = 16.dp).background(MaterialTheme.colorScheme.background)
         )
 
         TextField(textoTextField, {onTextChanged(it)}, label = { Text("Monto a Depositar")})
@@ -347,38 +358,4 @@ fun contenidoPantallaDepositar(
 
 
 
-@Preview()
-@Composable
-fun PantallaSeleccionPreview() {
-    ATMPatronesDeDiseñoTheme {
-        PantallaSeleccion(
-            saldo = 0,
-            onDepositarClick = {},
-            onRetirarClick = {},
-            onVolverClick = {},
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
-
-@Composable
-fun PantallaInicial(name: String, modifier: Modifier = Modifier) {
-//    Column(modifier = Modifier
-//        .fillMaxSize()
-//        .background(androidx.compose.ui.graphics.Color.DarkGray)) {
-//        Pantallas(contenido = {contenidoPantallaInicial(
-//            onTextChanged = { it: String -> texto = it},
-//            text = texto,
-//            onClick = { if(texto == "1234") pantallaActual = 2 else println("Contraseña incorrecta") }
-//        ) })
-//    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PantallaInicialPreview() {
-    ATMPatronesDeDiseñoTheme {
-        PantallaInicial("Android")
-    }
-}
 
