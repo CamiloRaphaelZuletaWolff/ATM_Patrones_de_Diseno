@@ -257,7 +257,6 @@ fun contenidoPantallaRetiro(){
 
 
 
-
 @Composable
 fun contenidoPantallaDepositar(){
     Column(
@@ -326,4 +325,6 @@ fun PantallaInicialPreview() {
         PantallaInicial("Android")
     }
 }
+
+
 
